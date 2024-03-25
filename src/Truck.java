@@ -25,7 +25,7 @@ public class Truck implements Runnable{
     public void fuellingAircraft (String aircraftName) {
         try {
             System.out.println(aircraftName + " \t: start fueling");
-            this.thread.sleep(1000);
+            // this.thread.sleep(1000);
             System.out.println(aircraftName + " \t: finish fueling");
         } catch (Exception e) {
         }

@@ -1,19 +1,30 @@
+// import java.util.concurrent.ExecutorService;
+// import java.util.concurrent.Executors;
+
 public class AsiaPacificAirport {
-	public static void main(String[] args) {
-		AirTrafficControl airControl = new AirTrafficControl();
+    public static void main(String[] args) {
+        AirTrafficControl airControl = new AirTrafficControl();
+        // ExecutorService executor = Executors.newFixedThreadPool(6);
 
-		Airplane a1 = new Airplane("Plane-1");
-		Airplane a2 = new Airplane("Plane-2");
-		Airplane a3 = new Airplane("Plane-3");
-		Airplane a4 = new Airplane("Plane-4");
-		Airplane a5 = new Airplane("Plane-5");
-		Airplane a6 = new Airplane("Plane-6");
+        for (int i = 0; i < 6; i++) {
+            try {
+                Thread.sleep(000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Airplane plane = new Airplane(i + 1);
+            airControl.requestToLand(plane);
+        }
 
-		a1.start();
-		a2.start();
-		a3.start();
-		a4.start();
-		a5.start();
-		a6.start();
-	}
+        // for (int i = 0; i < 6; i++) {
+        //     Airplane plane = new Airplane(i + 1, airControl);
+        //     executor.submit(plane);
+        //     try {
+        //         Thread.sleep(000);
+        //     } catch (Exception e) {
+        //         e.printStackTrace();
+        //     }
+        // }
+        // executor.shutdown();
+    }
 }

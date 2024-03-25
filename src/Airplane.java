@@ -1,13 +1,24 @@
 public class Airplane implements Runnable {
-    private String threadName;
+    private int id;
     private Thread thread;
+    private AirTrafficControl airTrafficControl;
 
-    public Airplane (String threadName) {
-        this.threadName = threadName;
+    public Airplane (int id) {
+        this.id = id;
     }
 
+    public Airplane (int id, AirTrafficControl airTrafficControl) {
+        this.id = id;
+        this.airTrafficControl = airTrafficControl;
+    }
+
+    // @Override
+    // public void run () {
+    //     airTrafficControl.requestToLand(this);
+    // }
+
     public void run () {
-        System.out.println(threadName + " running");
+        System.out.println(id + " running");
         try {
             for (int i = 0; i <= 4; i++) {
                 switch (i) {
@@ -29,23 +40,27 @@ public class Airplane implements Runnable {
                 }
             }
         } catch (Exception e) {
-            System.out.println(threadName + " interrupted");
+            System.out.println(id + " interrupted");
         }
     }
 
     public void start () {
-        System.out.println(threadName + " \t: started");
+        System.out.println("\tPlane " + id + " : started");
         if (thread == null) {
             thread = new Thread(this, "");
             thread.start();
         }
     }
     
+    public int getId() {
+        return this.id;
+    }
+    
     public void disembarkPassenger () {
         try {
-            System.out.println(threadName + " \t: disembark passenger");
+            System.out.println("\tPlane " + id + " : DISEMBARK PASSENGER");
             for (int i = 1; i <= 50; i++) {
-                System.out.println(threadName + " \t: disembarking passenger-" + i);
+                System.out.println("\tPlane " + id + " : DISEMBARKING PASSENGER-" + i);
             }
         } catch (Exception e) {
         }
@@ -53,9 +68,9 @@ public class Airplane implements Runnable {
 
     public void embarkPassenger () {
         try {
-            System.out.println(threadName + " \t: Embark passenger");
+            System.out.println("\tPlane " + id + " : Embark passenger");
             for (int i = 1; i <= 50; i++) {
-                System.out.println(threadName + " \t: embarking passenger-" + i);
+                System.out.println("\tPlane " + id + " : embarking passenger-" + i);
             }
         } catch (Exception e) {
         }
@@ -63,18 +78,18 @@ public class Airplane implements Runnable {
 
     public void refillSupplies() {
         try {
-            System.out.println(threadName + " \t: start refilling supplies");
-            this.thread.sleep(1000);
-            System.out.println(threadName + " \t: finish refilling supplies");
+            System.out.println("\tPlane " + id + " : start refilling supplies");
+            // this.thread.sleep(1000);
+            System.out.println("\tPlane " + id + " : finish refilling supplies");
         } catch (Exception e) {
         }
     }
 
     public void cleanAircraft() {
         try {
-            System.out.println(threadName + " \t: cleaning aircraft");
-            this.thread.sleep(1000);
-            System.out.println(threadName + " \t: finish cleaning aircraft");
+            System.out.println("\tPlane " + id + " : cleaning aircraft");
+            // this.thread.sleep(1000);
+            System.out.println("\tPlane " + id + " : finish cleaning aircraft");
         } catch (Exception e) {
         }
     }
