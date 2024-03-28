@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 public class AsiaPacificAirport {
     public static void main(String[] args) {
@@ -14,6 +15,7 @@ public class AsiaPacificAirport {
             emergencyPlanes.add(planeId);
         }
 
+        Semaphore airportGrounds = new Semaphore(3);
         for (int i = 1; i <= planeCount; i++) {
             try {
                 Thread.sleep(rand.nextInt(2000));
@@ -22,7 +24,7 @@ public class AsiaPacificAirport {
             }
 
             boolean isEmergency = emergencyPlanes.contains(i);
-            Plane plane = new Plane(i, isEmergency, atc);
+            Plane plane = new Plane(i, isEmergency, atc, airportGrounds);
             Thread planeThread = new Thread(plane);
             planeThread.start();
         }

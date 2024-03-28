@@ -23,7 +23,6 @@ public class AirTrafficControl {
                 System.out.println("ATC: Plane-" + plane.getId() + "  -  Please join circle queue & wait for instruction");
             }
             this.handleEmergencyLanding(plane);
-            plane.boardingDisembarkPassenger();
         } else {
             System.out.println("[" + common.getDate() + "]" + " Plane-" + plane.getId() + ": Request for landing");
             if (runway.tryAcquire()) {
@@ -34,7 +33,6 @@ public class AirTrafficControl {
                 System.out.println("ATC: Plane-" + plane.getId() + "  -  Please join circle queue & wait for instruction");
             }
             this.handleNormalLanding(plane);
-            plane.boardingDisembarkPassenger();
         }
     }
 
@@ -45,6 +43,8 @@ public class AirTrafficControl {
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
             dockGates[gateIndex].acquire();
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
+            Thread.sleep(1000);
+            plane.boardingDisembarkPassenger();
         }
     }
 
@@ -55,6 +55,8 @@ public class AirTrafficControl {
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
             dockGates[gateIndex].acquire();
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
+            Thread.sleep(1000);
+            plane.boardingDisembarkPassenger();
         }
     }
 
