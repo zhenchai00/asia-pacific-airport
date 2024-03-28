@@ -1,51 +1,78 @@
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
 
 public class AirTrafficControl {
-    private BlockingQueue<Airplane> runway;
-    private DockGate[] gates;
+    private final Semaphore runway;
+    private Semaphore[] dockGates;
 
-    public AirTrafficControl () {
-        // runway only can fit one plane in one time
-        this.runway = new ArrayBlockingQueue<>(1);
-
-        // three plane can park at the gate in the same time
-        this.gates = new DockGate[3];
-
+    public AirTrafficControl() {
+        runway = new Semaphore(1);
+        dockGates = new Semaphore[3];
         for (int i = 0; i < 3; i++) {
-            this.gates[i] = new DockGate(i + 1);
+            this.dockGates[i] = new Semaphore(1);
         }
     }
 
-    public void requestToLand (Airplane plane) {
-        try {
-            System.out.println("[" + common.getDate() + "]" + " Plane " + plane.getId() + " requesting permission to land!");
-            runway.put(plane);
-            plane.disembarkPassenger();
-            plane.cleanAircraft();
-            plane.refillSupplies();
-            plane.embarkPassenger();
-            System.out.println("ATC: Plane " + plane.getId() + " has landed and is waiting for gate assignment.");
-            assignGate(plane);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void assignGate (Airplane plane) {
-        DockGate availableGate = null;
-        for (DockGate gate : gates) {
-            if (gate.acquire()) {
-                availableGate = gate;
-                break;
+    public void requestPermissionToLand(Plane plane) throws InterruptedException {
+        if (plane.isEmergency()) {
+            System.out.println("Plane-" + plane.getId() + ": URGENT! Mechanical Malfunction. Request for landing");
+            if (runway.tryAcquire()) {
+                System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
+                System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
+                System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
+            } else {
+                System.out.println("ATC: Plane-" + plane.getId() + "  -  Please join circle queue & wait for instruction");
             }
+            this.handleEmergencyLanding(plane);
+            plane.boardingDisembarkPassenger();
+        } else {
+            System.out.println("[" + common.getDate() + "]" + " Plane-" + plane.getId() + ": Request for landing");
+            if (runway.tryAcquire()) {
+                System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
+                System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
+                System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
+            } else {
+                System.out.println("ATC: Plane-" + plane.getId() + "  -  Please join circle queue & wait for instruction");
+            }
+            this.handleNormalLanding(plane);
+            plane.boardingDisembarkPassenger();
         }
+    }
 
-        if (availableGate != null) {
-            System.out.println("ATC: Plane " + plane.getId() + " has been assigned to Gate " + availableGate.getId());
-            availableGate.release();
-            runway.remove(plane);
-            System.out.println("ATC: Plane " + plane.getId() + " has left the gate and taken off.");
+    private void handleNormalLanding(Plane plane) throws InterruptedException {
+        runway.release();
+        int gateIndex = selectDockGate(plane);
+        if (gateIndex > 0) {
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
+            dockGates[gateIndex].acquire();
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
         }
+    }
+
+    private void handleEmergencyLanding(Plane plane) throws InterruptedException {
+        runway.release();
+        int gateIndex = selectDockGate(plane);
+        if (gateIndex == 0) {
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
+            dockGates[gateIndex].acquire();
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
+        }
+    }
+
+    private int selectDockGate(Plane plane) {
+        if (plane.isEmergency()) {
+            return 0;
+        } else {
+            // acquire gate 1 and 2 
+            for (int i = 1; i < dockGates.length; i++) {
+                if (dockGates[i].tryAcquire()) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+    }
+
+    public void releaseDockGate(int gateIndex) {
+        dockGates[gateIndex].release();
     }
 }
