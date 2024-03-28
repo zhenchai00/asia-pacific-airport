@@ -12,52 +12,43 @@ public class AirTrafficControl {
         }
     }
 
-    public void requestPermissionToLand(Plane plane) throws InterruptedException {
-        if (plane.isEmergency()) {
-            System.out.println("Plane-" + plane.getId() + ": URGENT! Mechanical Malfunction. Request for landing");
-            if (runway.tryAcquire()) {
-                System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
-                System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
-                System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
-            } else {
-                System.out.println("ATC: Plane-" + plane.getId() + "  -  Please join circle queue & wait for instruction");
-            }
-            this.handleEmergencyLanding(plane);
-        } else {
-            System.out.println("[" + common.getDate() + "]" + " Plane-" + plane.getId() + ": Request for landing");
-            if (runway.tryAcquire()) {
-                System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
-                System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
-                System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
-            } else {
-                System.out.println("ATC: Plane-" + plane.getId() + "  -  Please join circle queue & wait for instruction");
-            }
-            this.handleNormalLanding(plane);
-        }
+    public void handleNormalLanding(Plane plane) throws InterruptedException {
+        this.handleLanding(plane);
     }
 
-    private void handleNormalLanding(Plane plane) throws InterruptedException {
-        runway.release();
-        int gateIndex = selectDockGate(plane);
-        if (gateIndex > 0) {
-            System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
-            dockGates[gateIndex].acquire();
-            System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
-            Thread.sleep(1000);
-            plane.boardingDisembarkPassenger();
-        }
+    public void handleEmergencyLanding(Plane plane) throws InterruptedException {
+        this.handleLanding(plane);
     }
 
-    private void handleEmergencyLanding(Plane plane) throws InterruptedException {
-        runway.release();
+    private void handleLanding(Plane plane) throws InterruptedException {
+        boolean isGateAvailable = checkAvailableGate();
+        System.out.println("Plane- " + plane.getId() + " Gate available: " + isGateAvailable);
+        while (!isGateAvailable) {
+            wait();
+        }
         int gateIndex = selectDockGate(plane);
-        if (gateIndex == 0) {
+        if (gateIndex >= 0) {
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
+            runway.acquire();
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
             dockGates[gateIndex].acquire();
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
-            Thread.sleep(1000);
-            plane.boardingDisembarkPassenger();
+            runway.release();
+            releaseDockGate(gateIndex);
         }
+        notify();
+    }
+
+    public boolean checkAvailableGate() {
+        for (int i = 0; i < dockGates.length; i++) {
+            System.out.println("Gate " + i + " available: " + dockGates[i].availablePermits());
+            if (dockGates[i].availablePermits() > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private int selectDockGate(Plane plane) {

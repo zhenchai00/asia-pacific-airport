@@ -1,26 +1,14 @@
-import java.util.concurrent.Semaphore;
-
 public class Plane implements Runnable {
     private static final int MAX_CAPACITY = 50;
     private final int id;
     private final boolean emergency;
     private final AirTrafficControl atc;
-    private final Semaphore airportGrounds;
 
-    public Plane(int id, boolean emergency, AirTrafficControl atc, Semaphore airportGrounds) {
+    public Plane(int id, boolean emergency, AirTrafficControl atc) {
         this.id = id;
         this.emergency = emergency;
         this.atc = atc;
-        this.airportGrounds = airportGrounds;
     }
-
-    // public void setId(int id) {
-    //     this.id = id;
-    // }
-
-    // public void setEmergency(boolean emergency) {
-    //     this.emergency = emergency;
-    // }
 
     public int getId() {
         return this.id;
@@ -30,10 +18,18 @@ public class Plane implements Runnable {
         return this.emergency;
     }
 
+    private void requestForLanding() throws InterruptedException {
+        if (this.emergency) {
+            System.out.println("[" + common.getDate() + "]" + " Plane-" + this.id + ": URGENT! Mechanical Malfunction. Request for landing");
+            atc.handleEmergencyLanding(this);
+        } else {
+            System.out.println("[" + common.getDate() + "]" + " Plane-" + this.id + ": Request for landing");
+            atc.handleNormalLanding(this);
+        }
+    }
+
     public void boardingDisembarkPassenger() {
         for (int i = 1; i <= MAX_CAPACITY; i++) {
-            // Passenger passenger = new Passenger(i, this.id);
-            // passenger.run();
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " disembarking...");
         }
     }
@@ -41,8 +37,9 @@ public class Plane implements Runnable {
     @Override
     public void run() {
         try {
-            airportGrounds.acquire();
-            atc.requestPermissionToLand(this);
+            while(true) {
+                this.requestForLanding();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
