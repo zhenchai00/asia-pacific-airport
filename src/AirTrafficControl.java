@@ -1,8 +1,10 @@
+import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 public class AirTrafficControl {
     private final Semaphore runway;
     private Semaphore[] dockGates;
+    private ArrayList<Object> landingPermission;
 
     public AirTrafficControl() {
         runway = new Semaphore(1);
@@ -10,6 +12,7 @@ public class AirTrafficControl {
         for (int i = 0; i < 3; i++) {
             this.dockGates[i] = new Semaphore(1);
         }
+        landingPermission = new ArrayList<>();
     }
 
     public void handleNormalLanding(Plane plane) throws InterruptedException {
@@ -20,37 +23,62 @@ public class AirTrafficControl {
         this.handleLanding(plane);
     }
 
-    private void handleLanding(Plane plane) throws InterruptedException {
-        boolean isGateAvailable = checkAvailableGate();
-        System.out.println("Plane- " + plane.getId() + " Gate available: " + isGateAvailable);
-        while (!isGateAvailable) {
-            wait();
-        }
-        int gateIndex = selectDockGate(plane);
-        if (gateIndex >= 0) {
-            System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
-            runway.acquire();
-            System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
-            dockGates[gateIndex].acquire();
-            System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
-            System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
-            System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
-            runway.release();
-            releaseDockGate(gateIndex);
-        }
-        notify();
+    // private void handleLanding(Plane plane) throws InterruptedException {
+    //     boolean isGateAvailable = isGateAvailable();
+    //     while (!isGateAvailable) {
+    //         wait();
+    //     }
+    //     int gateIndex = selectDockGate(plane);
+    //     if (gateIndex >= 0) {
+    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
+    //         runway.acquire();
+    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
+    //         dockGates[gateIndex].acquire();
+    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
+    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
+    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
+    //         runway.release();
+    //         releaseDockGate(gateIndex);
+    //     }
+    //     notify();
+    // }
+
+    public void handleLanding(Plane plane) throws InterruptedException {
+        int gateIndex = plane.getGateIndex();
+        System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
+        System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
+        this.useRunway();
+        System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
+        System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
+        this.releaseRunway();
+        System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
     }
 
-    public boolean checkAvailableGate() {
-        for (int i = 0; i < dockGates.length; i++) {
-            System.out.println("Gate " + i + " available: " + dockGates[i].availablePermits());
-            if (dockGates[i].availablePermits() > 0) {
+    synchronized public ArrayList<Object> landingPermission(Plane plane) throws InterruptedException {
+        if (!isGateAvailable()) {
+            wait();
+        }
+        landingPermission.add(isGateAvailable());
+        landingPermission.add(selectDockGate(plane));
+        notify();
+        return landingPermission;
+    }
+
+    public boolean isGateAvailable() {
+        for (Semaphore gate : dockGates) {
+            // System.out.println("Gate available permits: " + gate.availablePermits());
+            if (gate.availablePermits() > 0) {
                 return true;
             }
         }
         return false;
     }
 
+    /**
+     * Select a dock gate for the plane to dock and acquire the gate
+     * @param plane
+     * @return the index of the dock gate selected, -1 if no gate is available
+     */
     private int selectDockGate(Plane plane) {
         if (plane.isEmergency()) {
             return 0;
@@ -67,5 +95,13 @@ public class AirTrafficControl {
 
     public void releaseDockGate(int gateIndex) {
         dockGates[gateIndex].release();
+    }
+
+    public void releaseRunway() {
+        runway.release();
+    }
+
+    public void useRunway() throws InterruptedException {
+        runway.acquire();
     }
 }
