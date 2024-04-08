@@ -25,10 +25,6 @@ public class Plane implements Runnable {
     }
 
     private void requestForLanding() throws InterruptedException {
-        // ArrayList<Object> landingPermission = atc.requestLandingPermission(this);
-        // boolean isAllowedToLand = (boolean) landingPermission.get(0);
-        // int gateNum = (int) landingPermission.get(1);
-
         int gateNum = atc.requestLandingPermission(this);
         if (this.emergency) {
             System.out.println("[" + common.getDate() + "]" + " Plane-" + this.id + ": URGENT! Mechanical Malfunction. Request for landing");
@@ -48,25 +44,6 @@ public class Plane implements Runnable {
                 atc.allowPlaneToLand(this, gateNum + 1);
             }
         }
-
-
-        // if (gateNum < 0) {
-        //     if (this.emergency) {
-        //         atc.landingQueueEmergency.add(this);
-        //     } else {
-        //         atc.landingQueueNormal.add(this);
-        //     }
-        // } else {
-        //     if (this.emergency) {
-        //         System.out.println("[" + common.getDate() + "]" + " Plane-" + this.id + ": URGENT! Mechanical Malfunction. Request for landing");
-        //             System.out.println("Plane number - " + this.id + " gate - " + gateNum);
-        //             atc.allowPlaneToLand(this, gateIndex);
-        //     } else {
-        //         System.out.println("[" + common.getDate() + "]" + " Plane-" + this.id + ": Request for landing");
-        //             System.out.println("Plane number - " + this.id + " gate - " + gateNum);
-        //             atc.allowPlaneToLand(this, gateIndex);
-        //     }
-        // }
     }
 
     public void boardingPassenger() throws InterruptedException {
