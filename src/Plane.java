@@ -1,9 +1,13 @@
+import java.util.concurrent.TimeUnit;
+
 public class Plane implements Runnable {
     private static final int MAX_CAPACITY = 50;
     private final int id;
     private final boolean emergency;
     private final AirTrafficControl atc;
     private int gateIndex;
+    private long startTime;
+    private long endTime;
 
     public Plane(int id, boolean emergency, AirTrafficControl atc) {
         this.id = id;
@@ -25,6 +29,7 @@ public class Plane implements Runnable {
     }
 
     private void requestForLanding() throws InterruptedException {
+        startTime = System.currentTimeMillis();
         int gateNum = atc.requestLandingPermission(this);
         if (this.emergency) {
             System.out.println("[" + common.getDate() + "]" + " Plane-" + this.id + ": URGENT! Mechanical Malfunction. Request for landing");
@@ -44,11 +49,16 @@ public class Plane implements Runnable {
                 atc.allowPlaneToLand(this, gateNum + 1);
             }
         }
+        endTime = System.currentTimeMillis();
+        // https://stackoverflow.com/questions/37172989/measuring-execution-time-for-multithreaded-java-application
+        long elapsedTime = endTime - startTime;
+        long elapsedSeconds = TimeUnit.MILLISECONDS.toSeconds(elapsedTime);
+        System.out.println("ATC: Plane-" + this.id + " - Total time in seconds until leaving the gate: " + elapsedSeconds + " seconds");
     }
 
     public void boardingPassenger() throws InterruptedException {
         // for (int i = 1; i <= MAX_CAPACITY; i++) {
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 5; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " boarding...");
             Thread.sleep(100);
         }
@@ -56,7 +66,7 @@ public class Plane implements Runnable {
 
     public void disembarkingPassenger() throws InterruptedException {
         // for (int i = 1; i <= MAX_CAPACITY; i++) {
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 5; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " disembarking...");
             Thread.sleep(100);
         }

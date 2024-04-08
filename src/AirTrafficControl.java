@@ -26,12 +26,14 @@ public class AirTrafficControl {
             dockGatesNormal.acquire(1);
         }
 
-        System.out.println("[" + common.getDate() + "]" + " ATC: Plane-" + plane.getId() + "  -  Can use the runway");
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex);
-        this.useRunway();
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
-        this.releaseRunway();
+        synchronized (runway) {
+            System.out.println("[" + common.getDate() + "]" + " ATC: Plane-" + plane.getId() + "  -  Can use the runway");
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex);
+            this.useRunway();
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
+            this.releaseRunway();
+        }
         System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex);
 
         plane.disembarkingPassenger();
@@ -46,12 +48,14 @@ public class AirTrafficControl {
             dockGatesNormal.release(1);
         }
 
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving gate " + gateIndex);
-        this.useRunway();
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
-        this.releaseRunway();
+        synchronized (runway) {
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving gate " + gateIndex);
+            this.useRunway();
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
+            System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
+            this.releaseRunway();
+        }
 
         if (!landingQueueEmergency.isEmpty()) {
             Plane nextPlane = landingQueueEmergency.poll();
