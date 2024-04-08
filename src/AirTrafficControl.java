@@ -1,107 +1,128 @@
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class AirTrafficControl {
     private final Semaphore runway;
-    private Semaphore[] dockGates;
-    private ArrayList<Object> landingPermission;
+    private final int numberOfGates;
+    private Semaphore dockGatesNormal;
+    private Semaphore dockGatesEmergency;
+    protected Queue<Plane> landingQueueNormal;
+    protected Queue<Plane> landingQueueEmergency;
 
     public AirTrafficControl() {
         runway = new Semaphore(1);
-        dockGates = new Semaphore[3];
-        for (int i = 0; i < 3; i++) {
-            this.dockGates[i] = new Semaphore(1);
+        numberOfGates = 3;
+        dockGatesNormal = new Semaphore(numberOfGates - 1, true);
+        dockGatesEmergency = new Semaphore(1);
+        landingQueueNormal = new LinkedList<>();
+        landingQueueEmergency = new LinkedList<>();
+    }
+
+    public void allowPlaneToLand(Plane plane, int gateIndex) throws InterruptedException {
+        if (plane.isEmergency()) {
+            dockGatesEmergency.acquire(1);
+        } else {
+            dockGatesNormal.acquire(1);
         }
-        landingPermission = new ArrayList<>();
-    }
 
-    public void handleNormalLanding(Plane plane) throws InterruptedException {
-        this.handleLanding(plane);
-    }
-
-    public void handleEmergencyLanding(Plane plane) throws InterruptedException {
-        this.handleLanding(plane);
-    }
-
-    // private void handleLanding(Plane plane) throws InterruptedException {
-    //     boolean isGateAvailable = isGateAvailable();
-    //     while (!isGateAvailable) {
-    //         wait();
-    //     }
-    //     int gateIndex = selectDockGate(plane);
-    //     if (gateIndex >= 0) {
-    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
-    //         runway.acquire();
-    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
-    //         dockGates[gateIndex].acquire();
-    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
-    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
-    //         System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
-    //         runway.release();
-    //         releaseDockGate(gateIndex);
-    //     }
-    //     notify();
-    // }
-
-    public void handleLanding(Plane plane) throws InterruptedException {
-        int gateIndex = plane.getGateIndex();
         System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex + 1);
+        System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex);
         this.useRunway();
         System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
         System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
         this.releaseRunway();
-        System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex + 1);
-    }
+        System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex);
 
-    synchronized public ArrayList<Object> landingPermission(Plane plane) throws InterruptedException {
-        if (!isGateAvailable()) {
-            wait();
+        plane.disembarkingPassenger();
+        plane.boardingPassenger();
+
+        if (plane.isEmergency()) {
+            dockGatesEmergency.release(1);
+        } else {
+            dockGatesNormal.release(1);
         }
-        landingPermission.add(isGateAvailable());
-        landingPermission.add(selectDockGate(plane));
-        notify();
-        return landingPermission;
-    }
 
-    public boolean isGateAvailable() {
-        for (Semaphore gate : dockGates) {
-            // System.out.println("Gate available permits: " + gate.availablePermits());
-            if (gate.availablePermits() > 0) {
-                return true;
+        if (!landingQueueEmergency.isEmpty()) {
+            Plane nextPlane = landingQueueEmergency.poll();
+            int nextGateIndex = selectDockGate(nextPlane.isEmergency());
+            try {
+                allowPlaneToLand(nextPlane, nextGateIndex);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else if (!landingQueueNormal.isEmpty()) {
+            Plane nextPlane = landingQueueNormal.poll();
+            int nextGateIndex = selectDockGate(nextPlane.isEmergency());
+            try {
+                allowPlaneToLand(nextPlane, nextGateIndex);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        return false;
     }
 
-    /**
-     * Select a dock gate for the plane to dock and acquire the gate
-     * @param plane
-     * @return the index of the dock gate selected, -1 if no gate is available
-     */
-    private int selectDockGate(Plane plane) {
-        if (plane.isEmergency()) {
+    synchronized public ArrayList<Object> requestLandingPermission1(Plane plane) throws InterruptedException {
+        boolean isEmergency = plane.isEmergency();
+
+        if (!isNormalGateAvailable() || !isEmergencyGateAvailable()) {
+            handleLandingPermission(false, -1);
+        }
+
+        if (isEmergency && isEmergencyGateAvailable()) {
+            return handleLandingPermission(true, 0);
+        } else if (!isEmergency && isNormalGateAvailable()) {
+            return handleLandingPermission(false, selectDockGate(false));
+        } else {
+            return handleLandingPermission(false, -1);
+        }
+    }
+
+    synchronized public int requestLandingPermission(Plane plane) throws InterruptedException {
+        boolean isEmergency = plane.isEmergency();
+
+        if (isEmergency && isEmergencyGateAvailable()) {
+            return selectDockGate(isEmergency);
+        } else if (!isEmergency && isNormalGateAvailable()) {
+            return selectDockGate(isEmergency);
+        }
+
+        return -1;
+    }
+
+    private ArrayList<Object> handleLandingPermission(boolean permission, int gateIndex) {
+        ArrayList<Object> result = new ArrayList<>();
+        result.add(permission);
+        result.add(gateIndex);
+        return result;
+    }
+
+    public boolean isNormalGateAvailable() {
+        return dockGatesNormal.availablePermits() > 0;
+    }
+
+    public boolean isEmergencyGateAvailable() {
+        return dockGatesEmergency.availablePermits() > 0;
+    }
+
+    private int selectDockGate(boolean isEmergency) {
+        if (isEmergency) {
             return 0;
         } else {
-            // acquire gate 1 and 2 
-            for (int i = 1; i < dockGates.length; i++) {
-                if (dockGates[i].tryAcquire()) {
-                    return i;
-                }
-            }
-            return -1;
+            // acquire gate 1 and 2
+            return (int) (Math.random() * (numberOfGates - 1)) + 1;
         }
     }
 
-    public void releaseDockGate(int gateIndex) {
-        dockGates[gateIndex].release();
+    synchronized public void releaseDockGate() throws InterruptedException {
     }
 
-    public void releaseRunway() {
+    synchronized public void releaseRunway() throws InterruptedException {
         runway.release();
     }
 
-    public void useRunway() throws InterruptedException {
+    synchronized public void useRunway() throws InterruptedException {
         runway.acquire();
     }
 }

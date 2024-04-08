@@ -16,7 +16,7 @@ public class AsiaPacificAirport {
 
         for (int i = 1; i <= planeCount; i++) {
             try {
-                Thread.sleep(rand.nextInt(3000));
+                Thread.sleep(rand.nextInt(1000));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
