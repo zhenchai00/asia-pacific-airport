@@ -46,6 +46,10 @@ public class Plane implements Runnable {
         return this.totalTime;
     }
 
+    /**
+     * This method is the init method and request for landing to the air traffic control
+     * @throws InterruptedException
+     */
     private void requestForLanding() throws InterruptedException {
         this.startTime = System.currentTimeMillis();
         int gateNum = atc.requestLandingPermission(this);
@@ -69,6 +73,10 @@ public class Plane implements Runnable {
         }
     }
 
+    /**
+     * This method is to boarding passenger by sleep time 1 seconds with random passenger and max 50
+     * @throws InterruptedException
+     */
     public void boardingPassenger() throws InterruptedException {
         int passenger = rand.nextInt(MAX_CAPACITY);
         this.totalBoardingPassenger += passenger;
@@ -78,6 +86,10 @@ public class Plane implements Runnable {
         }
     }
 
+    /**
+     * This method is to disembark passenger by sleep time 1 seconds with random passenger and max 50
+     * @throws InterruptedException
+     */
     public void disembarkingPassenger() throws InterruptedException {
         int passenger = rand.nextInt(MAX_CAPACITY);
         this.totalDisembarkPassenger += passenger;
@@ -87,24 +99,49 @@ public class Plane implements Runnable {
         }
     }
 
+    /**
+     * This method is load and unload luggage
+     * @throws InterruptedException
+     */
     public void luggageLoading() throws InterruptedException {
+        System.out.println("\tPlane-" + this.id + " : Loading luggage");
+        Thread.sleep(1000);
+        System.out.println("\tPlane-" + this.id + " : Loading luggage - Finished");
+    }
+
+    /**
+     * This method is load and unload luggage
+     * @throws InterruptedException
+     */
+    public void luggageUnLoading() throws InterruptedException {
         System.out.println("\tPlane-" + this.id + " : Unloading luggage");
         Thread.sleep(1000);
         System.out.println("\tPlane-" + this.id + " : Unloading luggage - Finished");
     }
 
+    /**
+     * This method is to clean the aircraft after boarding
+     * @throws InterruptedException
+     */
     public void cleaningAircraft() throws InterruptedException {
         System.out.println("\tPlane-" + this.id + " : Cleaning & restocking catering supplies");
         Thread.sleep(1000);
         System.out.println("\tPlane-" + this.id + " : Clean & restock catering supplies - Finished");
     }
 
+    /**
+     * This method is to refuel and do maintenance 
+     * @throws InterruptedException
+     */
     public void refuelingMaintenance() throws InterruptedException {
         System.out.println("\tPlane-" + this.id + " : Refueling and doing maintenance");
         Thread.sleep(1000);
         System.out.println("\tPlane-" + this.id + " : Refueling and doing maintenance - Finished");
     }
 
+    /**
+     * This method is to calculate total time used per plane
+     */
     public void takeOff() {
         this.endTime = System.currentTimeMillis();
         // https://stackoverflow.com/questions/37172989/measuring-execution-time-for-multithreaded-java-application

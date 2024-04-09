@@ -11,7 +11,6 @@ public class AsiaPacificAirport {
         int planeCount = 6;
 
         try {
-
             Random rand = new Random();
             HashSet<Integer> emergencyPlanes = new HashSet<>();
 
@@ -28,6 +27,7 @@ public class AsiaPacificAirport {
                     e.printStackTrace();
                 }
 
+                // randomize plane in emergency scenario
                 boolean isEmergency = emergencyPlanes.contains(i);
                 // boolean isEmergency = false;
                 // if (i == 3 || i == 6) {
@@ -35,6 +35,7 @@ public class AsiaPacificAirport {
                 // }
                 Plane plane = new Plane(i, isEmergency, atc);
                 Thread planeThread = new Thread(plane);
+
                 planeThreads.add(planeThread);
                 planeThread.start();
                 planeList.add(plane);
@@ -42,10 +43,11 @@ public class AsiaPacificAirport {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            // wait all plane terminated only proceed to get airport report
             try {
                 for (Thread planeThread : planeThreads) {
                     try {
-                        planeThread.join();
+                        planeThread.join(); // wait each plane thread terminate
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
