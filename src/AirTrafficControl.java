@@ -30,10 +30,10 @@ public class AirTrafficControl {
         synchronized (runway) {
             System.out.println("[" + common.getDate() + "]" + " ATC: Plane-" + plane.getId() + "  -  Can use the runway");
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Please dock at Gate " + gateIndex);
-            this.useRunway();
+            runway.acquire();
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
-            this.releaseRunway();
+            runway.release();
         }
         System.out.println("ATC: Plane-" + plane.getId() + "  -  Dock Successfully at Gate " + gateIndex);
 
@@ -52,10 +52,10 @@ public class AirTrafficControl {
         synchronized (runway) {
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Can use the runway");
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving gate " + gateIndex);
-            this.useRunway();
+            runway.acquire();
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Using runway");
             System.out.println("ATC: Plane-" + plane.getId() + "  -  Leaving runway");
-            this.releaseRunway();
+            runway.release();
             plane.takeOff();
         }
 
@@ -105,14 +105,6 @@ public class AirTrafficControl {
             // acquire gate 1 and 2
             return (int) (Math.random() * (numberOfGates - 1)) + 1;
         }
-    }
-
-    synchronized public void releaseRunway() throws InterruptedException {
-        runway.release();
-    }
-
-    synchronized public void useRunway() throws InterruptedException {
-        runway.acquire();
     }
 
     public void getReport(ArrayList<Plane> planeList) throws InterruptedException {
