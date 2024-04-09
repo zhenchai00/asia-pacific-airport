@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class Plane implements Runnable {
@@ -5,15 +6,20 @@ public class Plane implements Runnable {
     private final int id;
     private final boolean emergency;
     private final AirTrafficControl atc;
+    private Random rand;
     private int gateIndex;
+    private int totalBoardingPassenger;
+    private int totalDisembarkPassenger;
     private long startTime;
     private long endTime;
+    private long totalTime; 
 
     public Plane(int id, boolean emergency, AirTrafficControl atc) {
         this.id = id;
         this.emergency = emergency;
         this.atc = atc;
         this.gateIndex = -1;
+        this.rand = new Random();
     }
 
     public int getId() {
@@ -28,8 +34,20 @@ public class Plane implements Runnable {
         return this.gateIndex;
     }
 
+    public int getTotalBoardingPassenger() {
+        return this.totalBoardingPassenger;
+    }
+
+    public int getTotalDisembarkPassenger() {
+        return this.totalDisembarkPassenger;
+    }
+    
+    public long getTotalTime() {
+        return this.totalTime;
+    }
+
     private void requestForLanding() throws InterruptedException {
-        startTime = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis();
         int gateNum = atc.requestLandingPermission(this);
         if (this.emergency) {
             System.out.println("[" + common.getDate() + "]" + " Plane-" + this.id + ": URGENT! Mechanical Malfunction. Request for landing");
@@ -49,24 +67,21 @@ public class Plane implements Runnable {
                 atc.allowPlaneToLand(this, gateNum + 1);
             }
         }
-        endTime = System.currentTimeMillis();
-        // https://stackoverflow.com/questions/37172989/measuring-execution-time-for-multithreaded-java-application
-        long elapsedTime = endTime - startTime;
-        long elapsedSeconds = TimeUnit.MILLISECONDS.toSeconds(elapsedTime);
-        System.out.println("ATC: Plane-" + this.id + " - Total time in seconds until leaving the gate: " + elapsedSeconds + " seconds");
     }
 
     public void boardingPassenger() throws InterruptedException {
-        // for (int i = 1; i <= MAX_CAPACITY; i++) {
-        for (int i = 1; i <= 5; i++) {
+        int passenger = rand.nextInt(MAX_CAPACITY);
+        this.totalBoardingPassenger += passenger;
+        for (int i = 1; i <= passenger; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " boarding...");
             Thread.sleep(100);
         }
     }
 
     public void disembarkingPassenger() throws InterruptedException {
-        // for (int i = 1; i <= MAX_CAPACITY; i++) {
-        for (int i = 1; i <= 5; i++) {
+        int passenger = rand.nextInt(MAX_CAPACITY);
+        this.totalDisembarkPassenger += passenger;
+        for (int i = 1; i <= passenger; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " disembarking...");
             Thread.sleep(100);
         }
@@ -88,6 +103,15 @@ public class Plane implements Runnable {
         System.out.println("\tPlane-" + this.id + " : Refueling and doing maintenance");
         Thread.sleep(1000);
         System.out.println("\tPlane-" + this.id + " : Refueling and doing maintenance - Finished");
+    }
+
+    public void takeOff() {
+        this.endTime = System.currentTimeMillis();
+        // https://stackoverflow.com/questions/37172989/measuring-execution-time-for-multithreaded-java-application
+        long elapsedTime = endTime - startTime;
+        long elapsedSeconds = TimeUnit.MILLISECONDS.toSeconds(elapsedTime);
+        totalTime = elapsedSeconds;
+        System.out.println("\nPlane-" + this.id + " - Used Time = " + elapsedSeconds + " seconds \n");
     }
 
     @Override
