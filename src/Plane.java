@@ -82,7 +82,7 @@ public class Plane implements Runnable {
         this.totalBoardingPassenger += passenger;
         for (int i = 1; i <= passenger; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " boarding...");
-            Thread.sleep(100);
+            Thread.sleep(500);
         }
     }
 
@@ -95,7 +95,7 @@ public class Plane implements Runnable {
         this.totalDisembarkPassenger += passenger;
         for (int i = 1; i <= passenger; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " disembarking...");
-            Thread.sleep(100);
+            Thread.sleep(500);
         }
     }
 

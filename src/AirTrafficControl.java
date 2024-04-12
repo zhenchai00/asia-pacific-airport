@@ -204,5 +204,6 @@ public class AirTrafficControl {
         System.out.println("Maximum Used Time: " + max + " seconds");
         System.out.println("Minimum Used Time: " + min + " seconds");
         System.out.println("Average Used Time: " + averageTime + " seconds");
+        System.out.println("Total Used Time: " + totalUsedTime + " seconds");
     }
 }
