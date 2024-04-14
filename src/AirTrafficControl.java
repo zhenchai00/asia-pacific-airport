@@ -15,7 +15,7 @@ public class AirTrafficControl {
         runway = new Semaphore(1);
         numberOfGates = 3;
         dockGatesNormal = new Semaphore(numberOfGates - 1, true);
-        dockGatesEmergency = new Semaphore(1);
+        dockGatesEmergency = new Semaphore(1, true);
         landingQueueNormal = new LinkedList<>();
         landingQueueEmergency = new LinkedList<>();
     }
