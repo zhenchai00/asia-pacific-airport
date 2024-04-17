@@ -52,14 +52,14 @@ public class Plane implements Runnable {
      */
     private void requestForLanding() throws InterruptedException {
         this.startTime = System.currentTimeMillis();
-        int gateNum = atc.requestLandingPermission(this);
+        int gateNum = atc.getAvailableDockGate();
         if (this.emergency) {
             System.out.println("[" + common.getDate() + "]" + " Plane-" + this.id + ": URGENT! Mechanical Malfunction. Request for landing");
             if (gateNum < 0) {
                 atc.landingQueueEmergency.add(this);
                 System.out.println("ATC: Plane-" + this.id + " Please join circle queue & wait for instruction.");
             } else {
-                atc.allowPlaneToLand(this, gateNum + 1);
+                atc.allowPlaneToLand(this, gateNum);
             }
 
         } else {
@@ -68,7 +68,7 @@ public class Plane implements Runnable {
                 atc.landingQueueNormal.add(this);
                 System.out.println("ATC: Plane-" + this.id + " Please join circle queue & wait for instruction.");
             } else {
-                atc.allowPlaneToLand(this, gateNum + 1);
+                atc.allowPlaneToLand(this, gateNum);
             }
         }
     }
@@ -80,9 +80,11 @@ public class Plane implements Runnable {
     public void boardingPassenger() throws InterruptedException {
         int passenger = rand.nextInt(MAX_CAPACITY);
         this.totalBoardingPassenger += passenger;
-        for (int i = 1; i <= passenger; i++) {
+        // for (int i = 1; i <= passenger; i++) {
+        for (int i = 1; i <= 10; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " boarding...");
-            Thread.sleep(500);
+            // Thread.sleep(500);
+            Thread.sleep(100);
         }
     }
 
@@ -93,9 +95,11 @@ public class Plane implements Runnable {
     public void disembarkingPassenger() throws InterruptedException {
         int passenger = rand.nextInt(MAX_CAPACITY);
         this.totalDisembarkPassenger += passenger;
-        for (int i = 1; i <= passenger; i++) {
+        // for (int i = 1; i <= passenger; i++) {
+        for (int i = 1; i <= 10; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " disembarking...");
-            Thread.sleep(500);
+            // Thread.sleep(500);
+            Thread.sleep(100);
         }
     }
 

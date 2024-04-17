@@ -28,11 +28,11 @@ public class AsiaPacificAirport {
                 }
 
                 // randomize plane in emergency scenario
-                boolean isEmergency = emergencyPlanes.contains(i);
-                // boolean isEmergency = false;
-                // if (i == 3 || i == 6) {
-                //     isEmergency = true;
-                // }
+                // boolean isEmergency = emergencyPlanes.contains(i);
+                boolean isEmergency = false;
+                if (i == 2 || i == 5) {
+                    isEmergency = true;
+                }
                 Plane plane = new Plane(i, isEmergency, atc);
                 Thread planeThread = new Thread(plane);
 
