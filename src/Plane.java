@@ -80,11 +80,9 @@ public class Plane implements Runnable {
     public void boardingPassenger() throws InterruptedException {
         int passenger = rand.nextInt(MAX_CAPACITY);
         this.totalBoardingPassenger += passenger;
-        // for (int i = 1; i <= passenger; i++) {
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= passenger; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " boarding...");
-            // Thread.sleep(500);
-            Thread.sleep(100);
+            Thread.sleep(500);
         }
     }
 
@@ -95,11 +93,9 @@ public class Plane implements Runnable {
     public void disembarkingPassenger() throws InterruptedException {
         int passenger = rand.nextInt(MAX_CAPACITY);
         this.totalDisembarkPassenger += passenger;
-        // for (int i = 1; i <= passenger; i++) {
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= passenger; i++) {
             System.out.println("\tPlane-" + this.id + " : Passenger " + i + " disembarking...");
-            // Thread.sleep(500);
-            Thread.sleep(100);
+            Thread.sleep(500);
         }
     }
 

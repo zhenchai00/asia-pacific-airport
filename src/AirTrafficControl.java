@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 public class AirTrafficControl {
@@ -14,7 +13,6 @@ public class AirTrafficControl {
     public AirTrafficControl() {
         runway = new Semaphore(1);
         numberOfGates = 3;
-        // dockGates = new Semaphore(numberOfGates, true);
         dockGates = new Semaphore[3];
         for (int i = 0; i < numberOfGates; i ++ ) {
             dockGates[i] = new Semaphore(1);
@@ -58,7 +56,7 @@ public class AirTrafficControl {
 
         if (!landingQueueEmergency.isEmpty()) {
             Plane nextPlane = landingQueueEmergency.poll();
-            int nextGateIndex = selectDockGate(nextPlane.isEmergency());
+            int nextGateIndex = selectDockGate();
             try {
                 allowPlaneToLand(nextPlane, nextGateIndex);
             } catch (InterruptedException e) {
@@ -67,7 +65,7 @@ public class AirTrafficControl {
         } else if (!landingQueueNormal.isEmpty()) {
         // } else {
             Plane nextPlane = landingQueueNormal.poll();
-            int nextGateIndex = selectDockGate(nextPlane.isEmergency());
+            int nextGateIndex = selectDockGate();
             System.out.println("-------------------------------------------------");
             System.out.println("Dock gate === " + nextGateIndex);
             System.out.println("-------------------------------------------------");
@@ -77,28 +75,6 @@ public class AirTrafficControl {
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * This method is to get the request landing permission, if return number 0, 1, 2 is the gate number/index
-     * @param plane plane object
-     * @return gate number / gate index
-     * @throws InterruptedException
-     */
-    synchronized public int requestLandingPermission(Plane plane) throws InterruptedException {
-        boolean isEmergency = plane.isEmergency();
-
-        // if (isEmergency && isEmergencyGateAvailable()) {
-        //     return selectDockGate(isEmergency);
-        // } else if (!isEmergency && isNormalGateAvailable()) {
-        //     return selectDockGate(isEmergency);
-        // }
-
-        // if (isGateAvailable()) {
-        //     return selectDockGate(isEmergency);
-        // }
-
-        return selectDockGate(isEmergency);
     }
 
     synchronized public int getAvailableDockGate() throws InterruptedException {
@@ -116,20 +92,6 @@ public class AirTrafficControl {
             }
         }
         return -1;
-    }
-
-    /**
-     * This method is to select the dock gate which have 3, 1 reserved for emergency and other 2 reserved for normal
-     * @param isEmergency boolean
-     * @return gate number / gate index
-     */
-    private int selectDockGate(boolean isEmergency) {
-        if (isEmergency) {
-            return 0;
-        } else {
-            // acquire gate 1 and 2
-            return (int) (Math.random() * (numberOfGates - 1)) + 1;
-        }
     }
 
     /**
