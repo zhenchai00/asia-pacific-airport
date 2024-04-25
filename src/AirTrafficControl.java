@@ -65,9 +65,6 @@ public class AirTrafficControl {
         } else if (!landingQueueNormal.isEmpty()) {
             Plane nextPlane = landingQueueNormal.poll();
             int nextGateIndex = selectDockGate();
-            System.out.println("-------------------------------------------------");
-            System.out.println("Dock gate === " + nextGateIndex);
-            System.out.println("-------------------------------------------------");
             try {
                 allowPlaneToLand(nextPlane, nextGateIndex);
             } catch (InterruptedException e) {
