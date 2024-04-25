@@ -135,7 +135,7 @@ public class Plane implements Runnable {
      */
     public void refuelingMaintenance() throws InterruptedException {
         System.out.println("\tPlane-" + this.id + " : Refueling and doing maintenance");
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         System.out.println("\tPlane-" + this.id + " : Refueling and doing maintenance - Finished");
     }
 
