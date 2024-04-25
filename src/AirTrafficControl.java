@@ -63,7 +63,6 @@ public class AirTrafficControl {
                 e.printStackTrace();
             }
         } else if (!landingQueueNormal.isEmpty()) {
-        // } else {
             Plane nextPlane = landingQueueNormal.poll();
             int nextGateIndex = selectDockGate();
             System.out.println("-------------------------------------------------");
@@ -124,13 +123,6 @@ public class AirTrafficControl {
                 System.out.println("Gates are not Clear");
             }
         }
-        // if (dockGates.availablePermits() > 0) {
-        //     for (int i = 1; i <= 3; i++) {
-        //         System.out.println("Gate " + i + " - Clear");
-        //     }
-        // } else {
-        //     System.out.println("Gates are not Clear");
-        // }
     }
 
     /**
