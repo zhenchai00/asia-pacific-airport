@@ -16,8 +16,8 @@ public class AsiaPacificAirport {
 
             // random generate the emergency plane
             while (emergencyPlanes.size() < 2) {
-            int planeId = rand.nextInt(planeCount) + 1;
-            emergencyPlanes.add(planeId);
+                int planeId = rand.nextInt(planeCount) + 1;
+                emergencyPlanes.add(planeId);
             }
 
             for (int i = 1; i <= planeCount; i++) {
