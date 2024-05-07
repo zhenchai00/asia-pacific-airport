@@ -161,7 +161,7 @@ public class AirTrafficControl {
         }
 
         int totalPlanes = planeList.size();
-        double averageTime = (double) totalUsedTime / totalPlanes;
+        int averageTime = (int) totalUsedTime / totalPlanes;
 
         System.out.println("Plane in Total: " + totalPlanes);
         System.out.println("Passenger Disembark in Total: " + disembarkingPassenger);
@@ -169,6 +169,6 @@ public class AirTrafficControl {
         System.out.println("Maximum Used Time: " + max + " seconds");
         System.out.println("Minimum Used Time: " + min + " seconds");
         System.out.println("Average Used Time: " + averageTime + " seconds");
-        System.out.println("Total Used Time: " + totalUsedTime + " seconds");
+        System.out.println("Total Used Time For All Plane: " + totalUsedTime + " seconds");
     }
 }
